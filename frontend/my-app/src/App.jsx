@@ -38,12 +38,45 @@ function App() {
     document.removeEventListener("mouseup", handleMouseUp);
   };
 
+  const [suggestions, setSuggestions] = useState([
+    {
+      id: 1,
+      type: "clarity",
+      text: 'Consider rephrasing for clarity: "Our data shows significant growth" instead of "The numbers went up"',
+    },
+    {
+      id: 2,
+      type: "tone",
+      text: 'Try a more confident tone: "I am confident that" instead of "I think maybe"',
+    },
+    {
+      id: 3,
+      type: "structure",
+      text: 'Add a transition here to improve flow: "Furthermore," or "Additionally,"',
+    },
+  ]);
+
+  // insights data
+  const [speechLengthData, setSpeechLengthData] = useState([]);
+  const [fillerWordsOverTime, setFillerWordsOverTime] = useState([]);
+  const [mostRecentTranscript, setMostRecentTranscript] = useState("");
+  const [mostRecentLength, setMostRecentLength] = useState(100);
+  const [mostRecentTone, setMostRecentTone] = useState("neutral");
+  const [mostRecentWordCount, setMostRecentWordCount] = useState(100);
+
+  const [loading, setLoading] = useState(false);
+
   return (
     <div className="h-screen w-screen flex bg-gray-900">
       {/* Left half */}
       <div className="w-1/2 bg-gray-900 p-4">
         <div className="h-full bg-gray-800 rounded-lg shadow-sm p-4">
-          <TranscriptChat />
+          <TranscriptChat
+            setMostRecentTranscript={setMostRecentTranscript}
+            setMostRecentLength={setMostRecentLength}
+            setMostRecentWordCount={setMostRecentWordCount}
+            setMostRecentTone={setMostRecentTone}
+          />
         </div>
       </div>
 
@@ -54,7 +87,10 @@ function App() {
           className="absolute top-0 left-0 right-0 bg-gray-800 p-4 overflow-y-auto"
           style={{ height: `${rightSplitPosition}%` }}
         >
-          <SuggestionBox />
+          <SuggestionBox
+            suggestions={suggestions}
+            setSuggestions={setSuggestions}
+          />
         </div>
 
         {/* Draggable divider */}
@@ -69,7 +105,16 @@ function App() {
           className="absolute bottom-0 left-0 right-0 bg-gray-800 p-4 overflow-y-auto"
           style={{ height: `${100 - rightSplitPosition}%` }}
         >
-          <InsightsDashboard />
+          <InsightsDashboard
+            mostRecentTranscript={mostRecentTranscript}
+            mostRecentLength={mostRecentLength}
+            mostRecentWordCount={mostRecentWordCount}
+            mostRecentTone={mostRecentTone}
+            speechLengthData={speechLengthData}
+            fillerWordsOverTime={fillerWordsOverTime}
+            setFillerWordsOverTime={setFillerWordsOverTime}
+            setSpeechLengthData={setSpeechLengthData}
+          />
         </div>
       </div>
     </div>

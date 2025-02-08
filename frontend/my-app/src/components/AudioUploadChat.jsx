@@ -46,7 +46,7 @@ const AudioUploadChat = ({ audioFile, setAudioFile }) => {
           />
           <label
             htmlFor="audio-upload"
-            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 text-white rounded-md cursor-pointer border border-gray-700 hover:bg-gray-700"
           >
             <Upload size={16} />
             Upload Audio

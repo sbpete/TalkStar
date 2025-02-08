@@ -1,7 +1,18 @@
 import React, { useState, useRef } from "react";
 import AudioUploadChat from "./AudioUploadChat";
+import axios from "axios";
+import { Audio } from "react-loader-spinner";
 
-const TranscriptChat = () => {
+const API_KEY = "dfbd6698ce39402fba92db96f2fe6daf"; // Replace with your actual API key
+const ASSEMBLYAI_URL = "https://api.assemblyai.com/v2";
+
+const TranscriptChat = ({
+  setMostRecentTranscript,
+  setMostRecentWordCount,
+  setMostRecentLength,
+  setMostRecentTone,
+}) => {
+  const [loading, setLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState([
     {
       id: 1,
@@ -44,28 +55,103 @@ const TranscriptChat = () => {
   const chatEndRef = useRef(null);
   const [audioFile, setAudioFile] = useState(null);
 
-  const handleNewFile = (file) => {
-    if (!file) {
-      setError("Please upload an audio file");
-      return;
-    }
+  const uploadFile = async (file) => {
+    if (!file) return;
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("file", file);
 
-    if (file) {
+    try {
+      const uploadRes = await axios.post(`${ASSEMBLYAI_URL}/upload`, formData, {
+        headers: {
+          Authorization: API_KEY,
+          "Content-Type": "application/octet-stream",
+        },
+      });
+      return uploadRes.data.upload_url;
+    } catch (error) {
+      console.error("Upload Error:", error);
+    }
+  };
+
+  const transcribeAudio = async (fileUrl) => {
+    try {
+      const res = await axios.post(
+        `${ASSEMBLYAI_URL}/transcript`,
+        {
+          audio_url: fileUrl,
+          sentiment_analysis: true,
+          entity_detection: true,
+        },
+        {
+          headers: {
+            Authorization: API_KEY,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return res.data.id;
+    } catch (error) {
+      console.error("Transcription Error:", error);
+    }
+  };
+
+  const fetchTranscription = async (transcriptId) => {
+    let status = "queued";
+    let result;
+    while (status !== "completed" && status !== "failed") {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      const response = await axios.get(
+        `${ASSEMBLYAI_URL}/transcript/${transcriptId}`,
+        {
+          headers: { Authorization: API_KEY },
+        }
+      );
+      result = response.data;
+      status = result.status;
+    }
+    return status === "completed" ? result : null;
+  };
+
+  const handleTranscription = async (file) => {
+    const fileUrl = await uploadFile(file);
+    if (!fileUrl) return;
+    const transcriptId = await transcribeAudio(fileUrl);
+    if (!transcriptId) return;
+    const transcriptData = await fetchTranscription(transcriptId);
+
+    setLoading(false);
+
+    return transcriptData;
+  };
+
+  const handleNewFile = async (file) => {
+    try {
+      setLoading(true);
+      const analysisResult = await handleTranscription(file);
+
       const newChat = {
-        id: Date.now(),
+        id: chatHistory.length + 1,
         fileName: file.name,
-        audioFile: file,
-        timestamp: new Date().toLocaleString(),
-        // Replace this with your actual transcript processing
-        transcript: `Transcript for ${file.name} would appear here.`,
+        timestamp: new Date().toLocaleTimeString(),
+        transcript: analysisResult.text,
       };
+
+      console.log("Analysis Result:", analysisResult);
+
+      setMostRecentTranscript(analysisResult.text);
+      setMostRecentWordCount(analysisResult.words.length);
+      setMostRecentLength(analysisResult.audio_duration);
+      //   setMostRecentTone(analysisResult.sentiment);
 
       setChatHistory((prev) => [...prev, newChat]);
       scrollToBottom();
+    } catch (error) {
+      setError("Error analyzing file: " + error.message);
+    } finally {
+      setLoading(false);
+      setAudioFile(null);
     }
-
-    setAudioFile(null);
-    setError("");
   };
 
   const scrollToBottom = () => {
@@ -78,6 +164,18 @@ const TranscriptChat = () => {
       <div className="flex items-center justify-between p-4 border-b">
         <h2 className="text-lg font-semibold">Audio Transcription Chat</h2>
       </div>
+
+      {/* Loading Indicator */}
+      {loading && (
+        <div className="absolute left-0 top-0 w-1/2 h-full flex items-center justify-center bg-gray-900 opacity-75 z-10">
+          <Audio
+            color="#ffffff"
+            height={64}
+            width={64}
+            className="opacity-100"
+          />
+        </div>
+      )}
 
       <div className="p-4 overflow-y-auto">
         {/* Chat History */}

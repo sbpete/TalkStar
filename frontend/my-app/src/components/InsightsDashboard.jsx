@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   LineChart,
   BarChart,
@@ -26,7 +26,7 @@ const CardTitle = ({ children, className }) => (
 const CardContent = ({ children }) => <div className="p-4">{children}</div>;
 
 const CircleStatCard = ({ title, value, color }) => (
-  <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg shadow-sm">
+  <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
     <div>
       <p className="text-sm text-gray-500">{title}</p>
       <h2 className="text-3xl font-bold text-gray-100">{value}</h2>
@@ -34,43 +34,114 @@ const CircleStatCard = ({ title, value, color }) => (
   </div>
 );
 
-const InsightsDashboard = () => {
-  // Sample data - replace with your actual data
-  // bar chart data
-  const fillerWordsData = [
-    { phrase: "um", count: 5 },
-    { phrase: "like", count: 3 },
-    { phrase: "you know", count: 2 },
-    { phrase: "so", count: 4 },
-    { phrase: "actually", count: 1 },
-  ];
+const FILLER_WORDS = new Set([
+  "um",
+  "uh",
+  "like",
+  "you know",
+  "I mean",
+  "so",
+  "actually",
+  "basically",
+  "kind of",
+  "sort of",
+]);
 
-  // filler words over past speeches
-  const fillerWordsOverTime = [
-    { speechId: 1, count: 5 },
-    { speechId: 2, count: 3 },
-    { speechId: 3, count: 2 },
-    { speechId: 4, count: 4 },
-    { speechId: 5, count: 1 },
-  ];
+const fillerWordsOverTimeDummyData = [
+  { speechId: "1", count: 5 },
+  { speechId: "2", count: 3 },
+  { speechId: "3", count: 2 },
+  { speechId: "4", count: 4 },
+  { speechId: "5", count: 1 },
+];
 
-  // wpm over past speeches
-  const speechLengthData = [
-    { speechId: 1, avgWords: 100 },
-    { speechId: 2, avgWords: 120 },
-    { speechId: 3, avgWords: 90 },
-    { speechId: 4, avgWords: 110 },
-    { speechId: 5, avgWords: 95 },
-  ];
+const speechLengthDataDummy = [
+  { speechId: "1", avgWords: 100 },
+  { speechId: "2", avgWords: 120 },
+  { speechId: "3", avgWords: 90 },
+  { speechId: "4", avgWords: 110 },
+  { speechId: "5", avgWords: 95 },
+];
 
-  const overallTone = "CONFIDENT";
-  const totalFillerWords = fillerWordsData.reduce(
-    (sum, item) => sum + item.count,
-    0
+const InsightsDashboard = ({
+  mostRecentTranscript,
+  mostRecentLength,
+  mostRecentWordCount,
+  mostRecentTone,
+  fillerWordsOverTime,
+  speechLengthData,
+  setFillerWordsOverTime,
+  setSpeechLengthData,
+}) => {
+  const [fillerWordsData, setFillerWordsData] = useState([
+    { phrase: "um", count: 10 },
+    { phrase: "uh", count: 5 },
+    { phrase: "like", count: 7 },
+    { phrase: "kind of", count: 3 },
+  ]);
+  const [fillerWordsCount, setFillerWordsCount] = useState(0);
+
+  useEffect(() => {
+    if (!mostRecentTranscript) return;
+
+    const words = mostRecentTranscript.split(" ");
+    const fillerWords = words.filter((word) =>
+      FILLER_WORDS.has(word.toLowerCase())
+    );
+    setFillerWordsCount(fillerWords.length);
+
+    // update filler words data in format array with { phrase, count }
+    const fillerWordsMap = {};
+
+    fillerWords.forEach((word) => {
+      const key = word.toLowerCase();
+      if (fillerWordsMap[key]) {
+        fillerWordsMap[key]++;
+      } else {
+        fillerWordsMap[key] = 1;
+      }
+    });
+
+    const fillerWordsData = Object.keys(fillerWordsMap).map((key) => ({
+      phrase: key,
+      count: fillerWordsMap[key],
+    }));
+
+    setFillerWordsData(fillerWordsData);
+
+    // update filler words over time data
+    const newFillerWordsOverTime = [
+      ...fillerWordsOverTime,
+      { speechId: fillerWordsOverTime.length + 1, count: fillerWords.length },
+    ];
+
+    setFillerWordsOverTime(newFillerWordsOverTime);
+
+    console.log("Most recent word count:", mostRecentWordCount);
+
+    // update speech length data
+    const newSpeechLengthData = [
+      ...speechLengthData,
+      {
+        speechId: speechLengthData.length + 1,
+        avgWords: mostRecentWordCount / (mostRecentLength / 60),
+      },
+    ];
+
+    setSpeechLengthData(newSpeechLengthData);
+
+    console.log("Most recent length:", mostRecentLength);
+  }, [mostRecentTranscript]);
+
+  // get avg words per minute
+  const avgWordsPerMinute = Math.round(
+    mostRecentWordCount / (mostRecentLength / 60)
   );
-  const averageWordsPerMinute = Math.round(
-    speechLengthData[speechLengthData.length - 1].words / 2.5
-  );
+
+  // get duration in minutes and seconds
+  const durationMinutes = Math.floor(mostRecentLength / 60);
+  const durationSeconds = mostRecentLength % 60;
+  const durationString = `${durationMinutes}m ${durationSeconds}s`;
 
   return (
     <div className="p-6 space-y-6">
@@ -80,7 +151,7 @@ const InsightsDashboard = () => {
           <div className="text-center">
             <p className="text-sm text-gray-100 mb-2">OVERALL TONE</p>
             <h1 className="text-6xl font-bold text-blue-600 tracking-wide">
-              {overallTone}
+              {mostRecentTone}
             </h1>
           </div>
         </CardContent>
@@ -88,10 +159,10 @@ const InsightsDashboard = () => {
 
       {/* Summary Stats */}
       <div className="flex flex-col md:flex-row gap-6 w-full justify-center">
-        <CircleStatCard title="Duration" value="2:30" />
-        <CircleStatCard title="Words" value="600" />
-        <CircleStatCard title="Filler Words" value="15" />
-        <CircleStatCard title="WPM" value="240" />
+        <CircleStatCard title="Duration" value={durationString} />
+        <CircleStatCard title="Words" value={mostRecentWordCount} />
+        <CircleStatCard title="Filler Words" value={fillerWordsCount} />
+        <CircleStatCard title="WPM" value={avgWordsPerMinute} />
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
@@ -127,7 +198,13 @@ const InsightsDashboard = () => {
           <CardContent>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={speechLengthData}>
+                <LineChart
+                  data={
+                    speechLengthData.length > 1
+                      ? speechLengthData
+                      : speechLengthDataDummy
+                  }
+                >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="speechId" />
                   <YAxis dataKey="avgWords" />
@@ -153,7 +230,13 @@ const InsightsDashboard = () => {
           <CardContent>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={fillerWordsOverTime}>
+                <LineChart
+                  data={
+                    fillerWordsOverTime.length > 1
+                      ? fillerWordsOverTime
+                      : fillerWordsOverTimeDummyData
+                  }
+                >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="speechId" />
                   <YAxis />

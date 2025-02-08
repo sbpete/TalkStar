@@ -1,27 +1,7 @@
 import React from "react";
 import { Lightbulb, ChevronRight } from "lucide-react";
 
-const SuggestionBox = ({ suggestions = [] }) => {
-  if (!suggestions.length) {
-    suggestions = [
-      {
-        id: 1,
-        type: "clarity",
-        text: 'Consider rephrasing for clarity: "Our data shows significant growth" instead of "The numbers went up"',
-      },
-      {
-        id: 2,
-        type: "tone",
-        text: 'Try a more confident tone: "I am confident that" instead of "I think maybe"',
-      },
-      {
-        id: 3,
-        type: "structure",
-        text: 'Add a transition here to improve flow: "Furthermore," or "Additionally,"',
-      },
-    ];
-  }
-
+const SuggestionBox = ({ suggestions, setSuggestions }) => {
   const getTypeColor = (type) => {
     const colors = {
       clarity: "bg-blue-50 border-blue-200",
@@ -67,9 +47,11 @@ const SuggestionBox = ({ suggestions = [] }) => {
 
             <div className="flex gap-2 mt-3">
               <div
-                className="px-3 py-1 text-sm text-gray-600 bg-white border rounded-md hover:bg-gray-50 transition-colors"
+                className="text-sm text-gray-600 rounded-md transition-colors cursor-pointer"
                 onClick={() =>
-                  console.log("Dismiss suggestion:", suggestion.id)
+                  setSuggestions(
+                    suggestions.filter((s) => s.id !== suggestion.id)
+                  )
                 }
               >
                 Dismiss
