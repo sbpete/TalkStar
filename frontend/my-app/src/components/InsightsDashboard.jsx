@@ -34,21 +34,21 @@ const CardTitle = ({ children, className }) => (
 
 const CardContent = ({ children }) => <div className="p-4">{children}</div>;
 
-const CircleStatCard = ({ title, value, color }) => (
+const CircleStatCard = ({ title, value, rotation }) => (
   <div className="flex-col items-center justify-center p-4 rounded-lg relative gap-12">
-    <p className="text-sm text-gray-500">{title}</p>
+    <p className="text-md text-gray-500 mb-2">{title}</p>
 
     <div className="text-center z-10 w-full">
       <img
         src={Knob}
         alt="knob"
-        className="max-w-24 opacity-50"
+        className="max-w-24 opacity-75"
         style={{
-          transform: `rotate(${value}deg)`,
+          transform: `rotate(${rotation || value}deg)`,
           transition: "transform 0.3s ease-in-out",
         }}
       />
-      <h2 className="text-3xl font-bold text-gray-100 absolute top-21 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full">
+      <h2 className="text-3xl font-bold text-gray-100 absolute top-24 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full shadow-lg opacity-50">
         {value}
       </h2>
     </div>
@@ -297,7 +297,7 @@ const InsightsDashboard = ({
             <div className="text-center">
               <p className="text-sm text-gray-100 mb-2">OVERALL SCORE</p>
               <h1 className="text-6xl font-bold text-blue-600 tracking-wide">
-                {mostRecentScore}
+                {mostRecentScore}/100
               </h1>
             </div>
           </CardContent>
@@ -306,7 +306,11 @@ const InsightsDashboard = ({
 
       {/* Summary Stats */}
       <div className="flex flex-col md:flex-row gap-6 w-full justify-center">
-        <CircleStatCard title="Duration" value={durationString} />
+        <CircleStatCard
+          title="Duration"
+          value={durationString}
+          rotation={mostRecentLength}
+        />
         <CircleStatCard title="Words" value={mostRecentWordCount} />
         <CircleStatCard title="Filler Words" value={fillerWordsCount} />
         <CircleStatCard title="WPM" value={avgWordsPerMinute} />
@@ -328,8 +332,18 @@ const InsightsDashboard = ({
                   <BarChart data={fillerWordsData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="phrase" />
-                    <YAxis />
-                    <Tooltip />
+                    <YAxis
+                      label={{
+                        value: "Count",
+                        angle: -90,
+                        position: "insideLeft",
+                      }}
+                    />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "#fff", color: "#000" }}
+                      labelStyle={{ fontWeight: "bold" }}
+                      formatter={(value) => [`${value}`, "Times used"]}
+                    />
                     <Bar dataKey="count" fill="#2563EB" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -361,13 +375,25 @@ const InsightsDashboard = ({
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="speechId" />
-                  <YAxis dataKey="avgWords" />
+                  <YAxis
+                    dataKey="avgWords"
+                    label={{
+                      value: "Avg Words",
+                      angle: -90,
+                      position: "insideLeft",
+                    }}
+                  />
                   <Line
                     type="monotone"
                     dataKey="avgWords"
-                    stroke="#fff"
+                    stroke="#2563EB"
                     strokeWidth={2}
                     dot={{ fill: "#2563EB" }}
+                  />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#fff", color: "#000" }}
+                    labelStyle={{ fontWeight: "bold" }}
+                    formatter={(value) => [`${value} words`, "Avg Words"]}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -393,13 +419,24 @@ const InsightsDashboard = ({
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="speechId" />
-                  <YAxis />
+                  <YAxis
+                    label={{
+                      value: "Count",
+                      angle: -90,
+                      position: "insideLeft",
+                    }}
+                  />
                   <Line
                     type="monotone"
                     dataKey="count"
-                    stroke="#fff"
+                    stroke="#2563EB"
                     strokeWidth={2}
                     dot={{ fill: "#2563EB" }}
+                  />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#fff", color: "#000" }}
+                    labelStyle={{ fontWeight: "bold" }}
+                    formatter={(value) => [`${value} words`, "Filler Words"]}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -427,13 +464,25 @@ const InsightsDashboard = ({
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="speechId" />
-                  <YAxis domain={[0, 100]} />
+                  <YAxis
+                    domain={[0, 100]}
+                    label={{
+                      value: "Score",
+                      angle: -90,
+                      position: "insideLeft",
+                    }}
+                  />
                   <Line
                     type="monotone"
                     dataKey="score"
-                    stroke="#fff"
+                    stroke="#2563EB"
                     strokeWidth={2}
                     dot={{ fill: "#2563EB" }}
+                  />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#fff", color: "#000" }}
+                    labelStyle={{ fontWeight: "bold" }}
+                    formatter={(value) => [`${value}%`, "Score"]}
                   />
                 </LineChart>
               </ResponsiveContainer>

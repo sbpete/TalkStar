@@ -263,7 +263,7 @@ const TranscriptChat = ({
       {/* Header */}
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-2">
-          <CgTranscript className="w-6 h-6" />
+          <CgTranscript className="w-6 h-6 text-yellow-500" />
           <h2 className="text-lg font-semibold">Transcription Chat</h2>
         </div>
         <AudioDropdown />
@@ -324,7 +324,7 @@ const TranscriptChat = ({
       {/* Submit Button */}
       <div className="pt-4" />
       <div
-        className="w-full bg-blue-500 text-white rounded-md py-2 text-center cursor-pointer hover:bg-blue-600"
+        className="w-full bg-blue-500 text-white rounded-md py-2 text-center cursor-pointer hover:bg-blue-600 font-semibold"
         onClick={() => handleNewFile(audioFile, error)}
       >
         Submit

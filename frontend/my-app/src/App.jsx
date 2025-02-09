@@ -73,11 +73,18 @@ function App() {
   return (
     <div className="w-screen h-screen bg-gray-900 flex flex-col">
       {/* Header */}
-      <div className="flex items-center px-4 py-2 border-b-2 border-gray-700 gap-4">
-        <h2 className="text-2xl font-semibold text-white">TalkStar</h2>
-        <img src={Guitar} alt="logo" className="h-10 transform rotate-45" />
+      <div className="flex items-center px-8 py-2 border-b-2 border-gray-700 justify-between">
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-semibold text-white">TalkStar</h2>
+          <img src={Guitar} alt="logo" className="h-10 transform rotate-45" />
+          <p className="text-white font-semibold">Speech Assistant</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <p className="text-white font-semibold">Welcome, Rockstar</p>
+        </div>
       </div>
-      <div className="h-[95vh] w-screen flex bg-gray-900">
+
+      <div className="h-[95vh] w-screen flex bg-gray-900 relative">
         {/* Left half */}
         <div className="w-1/2 bg-gray-900 p-4">
           <div className="h-full bg-gray-800 rounded-lg shadow-sm p-4">
@@ -140,6 +147,11 @@ function App() {
               </div>
             </div>
           </div>
+        </div>
+        {/* Credits */}
+        <div className="text-right absolute top-0 right-0 p-4 text-gray-500">
+          Made by{" "}
+          <p className="text-blue-500 inline-block">Amir, Rhett, and Sam</p>
         </div>
       </div>
     </div>
