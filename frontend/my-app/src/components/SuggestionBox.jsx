@@ -2,14 +2,14 @@ import React from "react";
 import { Lightbulb, ChevronRight } from "lucide-react";
 
 const SuggestionBox = ({ suggestions, setSuggestions }) => {
-  const getTypeColor = (type) => {
-    const colors = {
-      clarity: "bg-blue-50 border-blue-200",
-      tone: "bg-purple-50 border-purple-200",
-      structure: "bg-green-50 border-green-200",
-      default: "bg-gray-50 border-gray-200",
-    };
-    return colors[type] || colors.default;
+  const getTypeColor = (id) => {
+    const colors = [
+      "bg-blue-100 border-blue-200",
+      "bg-purple-100 border-purple-200",
+      "bg-green-100 border-green-200",
+      "bg-yellow-100 border-yellow-200",
+    ];
+    return colors[id % colors.length];
   };
 
   const getTypeLabel = (type) => {
@@ -33,16 +33,10 @@ const SuggestionBox = ({ suggestions, setSuggestions }) => {
         {suggestions.map((suggestion) => (
           <div
             key={suggestion.id}
-            className={`p-4 rounded-lg border ${getTypeColor(
-              suggestion.type
-            )} transition-all hover:shadow-md text-left`}
+            className={`p-4 rounded-lg transition-all hover:shadow-md text-left bg-gray-300 ${getTypeColor(
+              suggestion.id
+            )} border-2 transform hover:-translate-y-1`}
           >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-600">
-                {getTypeLabel(suggestion.type)}
-              </span>
-            </div>
-
             <p className="text-gray-700">{suggestion.text}</p>
 
             <div className="flex gap-2 mt-3">
