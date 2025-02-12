@@ -8,12 +8,11 @@ import AudioDropdown from "./AudioDropdown";
 import { CgTranscript } from "react-icons/cg";
 
 const anthropic = new Anthropic({
-  apiKey:
-    "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",
+  apiKey: process.env.CLAUDE_API_KEY,
   dangerouslyAllowBrowser: true,
 });
 
-const API_KEY = "dfbd6698ce39402fba92db96f2fe6daf"; // Replace with your actual API key
+const API_KEY = process.env.ASSEMBLY_AI_API_KEY;
 const ASSEMBLYAI_URL = "https://api.assemblyai.com/v2";
 
 const TranscriptChat = ({
